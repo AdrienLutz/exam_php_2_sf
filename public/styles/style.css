@@ -1,0 +1,36 @@
+*{
+    text-align: center;
+    color:rgba(52, 109, 166, 0.712);
+    font-family: 'Poppins', sans-serif;
+}
+
+h1{
+    border-bottom: 1px solid rgba(52, 109, 166, 0.712);
+    border-top: 1px solid rgba(52, 109, 166, 0.712);
+}
+
+footer{
+    border-top: 1px solid rgba(52, 109, 166, 0.712);
+}
+
+.card_link{
+    text-decoration: none;
+    color:rgba(52, 109, 166, 0.712);
+}
+
+.blue_color{
+    color:rgba(52, 109, 166, 0.712); 
+}
+
+.hover-blue:hover{
+    background-color: rgba(194, 219, 245, 0.712);
+}
+
+
+/* .add_submit{
+    border-radius: 10px;
+}
+
+.add_submit:hover{
+    background-color: rgba(194, 219, 245, 0.712);
+} */

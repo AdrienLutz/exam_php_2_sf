@@ -14,8 +14,8 @@ abstract class DbManager
     {
         try {
             $this->bdd = new PDO('mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8', $this->user, $this->password);
-//            $this->bdd->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-            echo('connected');
+            $this->bdd->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+            //echo('connected');
         } catch (PDOException $e) {
             var_dump($e);
             die();

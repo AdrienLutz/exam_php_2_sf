@@ -1,158 +1,132 @@
 <?php
-
-//classe en charge de la sécurité
 class SecurityController
 {
-
-    //on injecte ici le "userManager" pour requeter les données utilisateurs (on en a besoin pour vérifier que Username n'existe pas déjà par exemple)
     private $userManager;
-    //partagé avec les classes enfant, c'eest l'utilisateur connecté
-    protected $currentUser;
+    // Injection du "userManager" qui permettra de requêter nos données utilisateur
+    // (afin de vérifier que Username n'existe pas déjà par exemple)
 
+    protected $currentUser;
+    // C'est l'utilisateur connecté (partagé avec les classes enfant)
 
     public function __construct()
     {
-        //on initialise notre user manager
+        // Initialiser user manager
         $this->userManager = new UserManager();
         $this->currentUser = null;
-        //on vérifie que l'on a un utilisateur en session
+        // Vérifier si un utilisateur est en session
         if (array_key_exists("user", $_SESSION)) {
-            //si je suis connecté, j'aurais forcément un attribut "currentuser"
-            // il est stocké sous forme de texte dans la session, on doit le transformer en objet
+            // Si je suis connecté, j'aurais forcément un attribut "currentuser"
+            // Il est stocké sous forme de texte dans la session, on doit le transformer en objet
             $this->currentUser = unserialize($_SESSION["user"]);
         }
 
     }
 
-    //cette fonction vérifie que l'on a un attribut "currentuser", si c'est pas le cas, cela signifie qu'on n'est pas connecté (cf. constructeur)
-    //donc on redirige vers la page de login
     public function isLoggedIn()
     {
-        //2cas possibles:
-        //j'ai un curretn user et donc je le retourne sinon je renvoie l'utilisateur vers la page de login
+        // Vérifier l'attribut currentUser
         if (!$this->currentUser) {
+            // Sinon, nous ne sommes pas connecté et redirigé vers login
             header('Location: index.php?controller=security&action=login');
             die();
         }
     }
-    //suppression de la session, vide l'attribut utilisateur courant et redirige vers le login
-    public function logout(){
-        session_destroy();
-        $this->currentUser = null;
 
+    public function logout()
+    {
+        // Supprimer la session
+        session_destroy();
+        // Vider l'attribut utilisateur courant
+        $this->currentUser = null;
+        // Rediriger vers le login
         header('Location: index.php?controller=security&action=login');
     }
-    //affiche le form de login
-    //lors de la soumission, elle le vérifie
-    //elle connecte l'utilisateur si les identifiants sont ok et stocke en session notre utilisateur qu'elle a transformé en texte puisqu'en session on peut pas stocker un objet
-    //elle met à jour notre attribut currentuser avec l'utilisateur connecté
+
     public function login()
     {
         $errors = [];
-
         if ($_SERVER["REQUEST_METHOD"] == 'POST') {
-
-            // champ "username" vide
+            // Est-ce que le champ "username" est vide ?
             if (empty($_POST["username"])) {
                 $errors["username"] = "Veuillez saisir un username";
             }
-
-            // champ "password" vide
+            // Est-ce que le champ "password" est vide ?
             if (empty($_POST["password"])) {
                 $errors["password"] = 'Veuillez saisir votre mot de passe';
             }
-
-            // Si 0 erreur, enregistrement
+            // S'il n'y a pas d'erreur, alors l'enregistrement peut commencer
             if (count($errors) == 0) {
-                // on récupère notre utilisateur
+                // Récupérer l'utilisateur
                 $user = $this->userManager->getByUsername($_POST["username"]);
-                // si l'utilisateur n'existe pas (vérification par le mot de passe), on affiche une erreur
-                // on vérifie en même temps si le mot de passe est OK
+                // Si l'utilisateur n'existe pas (vérification par le mot de passe), une erreur s'affiche
+                // Vérifier, en même temps, si le mot de passe est correct
                 if (is_null($user) || !password_verify($_POST["password"], $user->getPassword())) {
                     $errors["password"] = 'Identifiant ou mot de passe invalide';
                 } else {
-                    // sinon ça veut dire que tout est ok et on va stocker l'utilisateur dans la session (sauf qu'on ne peut stocker un objet en session, il faut faire une chaine de caractère
-
+                    // Sinon cela signifie que tout est ok pour stocker l'utilisateur dans la session
+                    // Mettre à jour l'attribut "currentUser" avec l'utilisateur connecté
                     $this->currentUser = $user;
+                    // ATTENTION, on ne peut stocker un objet en session d'où l'intérêt d'une chaine de caractère
                     $_SESSION["user"] = serialize($user);
-                    //il est connecté, je le renvoie donc vers la page d'accueil
+                    // Une fois connecté, renvoi vers la page d'accueil
                     header('Location: index.php?controller=default&action=home');
                 }
-
-
             }
-
         }
-
-
         require 'View/security/login.php';
     }
 
-    //affiche le formulaire pour s'enregistrer
-    //vérifie les saisies du form
-    //enregistre l'utilisateur (bien penser au hachage)
-    //redirige notre utilisateur vers le login
     public static function connexion_status()
     {
+        // But de cette fonction :
+        // Permettre d'afficher un bouton "connexion" OU "déconnexion" dans la navbar
         if (array_key_exists("user", $_SESSION)) {
             return true;
         } else {
             return false;
         }
     }
+
     public function register()
     {
-
         $errors = [];
-
         if ($_SERVER["REQUEST_METHOD"] == 'POST') {
-
-            // champ "username" vide
+            // Est-ce que le champ "username" est vide ?
             if (empty($_POST["username"])) {
                 $errors["username"] = "Veuillez saisir un username";
             }
-
-            // Username déjà utilisé
+            // Est-ce que le "username" a déjà été utilisé auparavant ?
             $user = $this->userManager->getByUsername($_POST["username"]);
-
             if ($user) {
                 $errors['username'] = 'Impossible cet utilisateur existe déjà';
             }
-
-            // champ "nom" vide
+            // Est-ce que le champ "nom" est vide ?
             if (empty($_POST["nom"])) {
                 $errors["nom"] = 'Veuillez saisir votre nom';
             }
-
-            // champ "prenom" vide
+            // Est-ce que le champ "prenom" est vide ?
             if (empty($_POST["prenom"])) {
                 $errors["prenom"] = 'Veuillez saisir votre prénom';
             }
-
-            // champ "password" vide
+            // Est-ce que le champ "password" est vide ?
             if (empty($_POST["password"])) {
                 $errors["password"] = 'Veuillez saisir votre mot de passe';
             }
-
-            // vérification du mot de passe
+            // Vérifier la correspondance des mots de passe
             if ($_POST["password"] !== $_POST["confirm_password"]) {
                 $errors["confirm_password"] = 'Les mots de passe ne correspondent pas';
             }
-
             // Si 0 erreur, enregistrement
             if (count($errors) == 0) {
+                // Créer l'utilisateur et hacher son mot de passe
                 $user = new User(null, $_POST["username"], $_POST["nom"],
                     $_POST["prenom"], password_hash($_POST["password"], PASSWORD_DEFAULT));
-                //mon utilisateur est créé
-                //j'appelle mon manager pour aller l'enregister et le rediriger vers le login
+                // Appel du manager pour aller l'enregistrer ...
                 $this->userManager->add($user);
-                // on renvoie vers le login
+                // ... et le dédiriger vers le login
                 header('Location: index.php?controller=security&action=login');
             }
-
         }
-
         require 'View/security/register.php';
     }
-
 }

@@ -35,6 +35,9 @@
         <a class="btn btn-outline-warning"
            href="index.php?controller=default&action=home">Home</a>
 
+        <a class="btn btn-outline-warning"
+           href="index.php?controller=security&action=register">S'inscrire</a>
+
     </form>
 </div>
 

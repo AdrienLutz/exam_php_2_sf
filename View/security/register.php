@@ -62,6 +62,13 @@
 
         <input type="submit" class="btn btn-success m-2">
 
+
+        <a class="btn btn-outline-warning"
+           href="index.php?controller=default&action=home">Home</a>
+
+        <a class="btn btn-outline-warning"
+           href="index.php?controller=security&action=login">Retour</a>
+
     </form>
 </div>
 

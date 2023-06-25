@@ -120,7 +120,7 @@ class SecurityController
             if (count($errors) == 0) {
                 // Créer l'utilisateur et hacher son mot de passe
                 $user = new User(null, $_POST["username"], $_POST["nom"],
-                    $_POST["prenom"], password_hash($_POST["password"], PASSWORD_DEFAULT));
+                    $_POST["prenom"], password_hash($_POST["password"], PASSWORD_BCRYPT));
                 // Appel du manager pour aller l'enregistrer ...
                 $this->userManager->add($user);
                 // ... et le dédiriger vers le login
